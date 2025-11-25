@@ -3,152 +3,255 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Result Management System</title>
+    <title>Daily Report | Student Result Management System</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
+            background-color: rgba(173, 77, 77, 0.048);
+            color: #333;
             margin: 0;
-            padding: 20px;
+            padding: 0;
         }
 
         .container {
             max-width: 900px;
-            margin: 0 auto;
-            padding: 20px;
+            margin: 50px auto;
             background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 12px rgba(0, 0, 0, 0.2);
         }
 
-        h1 {
+        h1, h2 {
             text-align: center;
-            color: #333;
-        }
-
-        .form-container {
-            margin-bottom: 30px;
+            color: darkolivegreen;
         }
 
         form {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
         }
 
         input, button {
             padding: 10px;
-            margin: 5px 0;
+            font-size: 16px;
+            border-radius: 6px;
             border: 1px solid #ccc;
-            border-radius: 5px;
         }
 
         button {
-            background-color: #4CAF50;
+            background-color: maroon;
             color: white;
             cursor: pointer;
+            font-weight: bold;
         }
 
         button:hover {
-            background-color: #45a049;
+            background-color: #a00000;
         }
 
-        input[type="file"] {
-            padding: 5px;
+        .hidden {
+            display: none;
         }
 
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 25px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+
+        th {
+            background-color: maroon;
+            color: white;
+        }
+
+        img {
+            border-radius: 50%;
+            height: 50px;
+            width: 50px;
+        }
+
+        .logout-btn {
+            background-color: #444;
+            color: white;
+            float: right;
+            margin-top: -40px;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Student Result Management System</h1>
 
-    <!-- Student Registration Form -->
-    <div class="form-container">
+    <!-- LOGIN PAGE -->
+    <div id="loginPage">
+        <h1>Login Page</h1>
+        <form id="loginForm">
+            <label>Username:</label>
+            <input type="text" id="username" placeholder="Enter username" required>
+            <label>Password:</label>
+            <input type="password" id="password" placeholder="Enter password" required>
+            <button type="submit">Login</button>
+        </form>
+    </div>
+
+    <!-- STUDENT FORM PAGE -->
+    <div id="studentPage" class="hidden">
+        <h1>Student Result Management System</h1>
+        <button class="logout-btn" onclick="logout()">Logout</button>
         <form id="studentForm">
-            <label for="name">Student Name:</label>
+            <label>Student Name:</label>
             <input type="text" id="name" required>
 
-            <label for="rollNo">Roll Number:</label>
+            <label>Roll Number:</label>
             <input type="text" id="rollNo" required>
 
-            <label for="marks">Enter Marks (Math, Science, English):</label>
-            <input type="number" id="mathMarks" required placeholder="Math Marks">
-            <input type="number" id="scienceMarks" required placeholder="Science Marks">
-            <input type="number" id="englishMarks" required placeholder="English Marks">
+            <label>Enter Marks:</label>
+            <input type="number" id="mathMarks" placeholder="Math Marks" required>
+            <input type="number" id="scienceMarks" placeholder="Science Marks" required>
+            <input type="number" id="englishMarks" placeholder="English Marks" required>
 
-            <label for="photo">Upload Photo:</label>
-            <input type="file" id="photo" accept="image/*">
+            <label>Upload Photo:</label>
+            <input type="file" id="photo" accept="image/*" required>
 
             <button type="submit">Submit</button>
         </form>
+
+        <hr>
+        <h2>Student Results</h2>
+        <table id="resultsTable">
+            <thead>
+                <tr>
+                    <th>Photo</th>
+                    <th>Name</th>
+                    <th>Roll No</th>
+                    <th>Math</th>
+                    <th>Science</th>
+                    <th>English</th>
+                    <th>Total</th>
+                    <th>Average</th>
+                    <th>Grade</th>
+                </tr>
+            </thead>
+            <tbody id="resultsBody"></tbody>
+        </table>
     </div>
 
 </div>
 
 <script>
-    // Function to calculate the grade based on the average
-    function getGrade(average) {
-        if (average >= 90) return 'A+';
-        if (average >= 80) return 'A';
-        if (average >= 70) return 'B';
-        if (average >= 60) return 'C';
-        if (average >= 50) return 'D';
+    // ---------- LOGIN LOGIC ----------
+    const loginPage = document.getElementById("loginPage");
+    const studentPage = document.getElementById("studentPage");
+    const loginForm = document.getElementById("loginForm");
+
+    // Fixed credentials
+    const validUsername = "sejan";
+    const validPassword = "1343";
+
+    // Check if already logged in
+    if (localStorage.getItem("loggedIn") === "true") {
+        showStudentPage();
+    }
+
+    loginForm.addEventListener("submit", function(e) {
+        e.preventDefault();
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value.trim();
+
+        if (username === validUsername && password === validPassword) {
+            localStorage.setItem("loggedIn", "true");
+            showStudentPage();
+        } else {
+            alert("Invalid username or password! Please try again.");
+        }
+    });
+
+    function showStudentPage() {
+        loginPage.classList.add("hidden");
+        studentPage.classList.remove("hidden");
+        loadResults();
+    }
+
+    function logout() {
+        localStorage.removeItem("loggedIn");
+        location.reload();
+    }
+
+    // ---------- GRADE CALCULATION ----------
+    function getGrade(avg) {
+        if (avg >= 90) return 'A+';
+        if (avg >= 80) return 'A';
+        if (avg >= 70) return 'B';
+        if (avg >= 60) return 'C';
+        if (avg >= 50) return 'D';
         return 'F';
     }
 
-    // Event listener for form submission
-    document.getElementById('studentForm').addEventListener('submit', function(e) {
-        e.preventDefault(); // Prevent form from submitting traditionally
+    // ---------- STUDENT FORM SUBMIT ----------
+    document.getElementById("studentForm").addEventListener("submit", function(e) {
+        e.preventDefault();
 
-        // Get student information
-        const name = document.getElementById('name').value;
-        const rollNo = document.getElementById('rollNo').value;
-        const mathMarks = parseFloat(document.getElementById('mathMarks').value);
-        const scienceMarks = parseFloat(document.getElementById('scienceMarks').value);
-        const englishMarks = parseFloat(document.getElementById('englishMarks').value);
-        const photoInput = document.getElementById('photo');
+        const name = document.getElementById("name").value;
+        const rollNo = document.getElementById("rollNo").value;
+        const mathMarks = parseFloat(document.getElementById("mathMarks").value);
+        const scienceMarks = parseFloat(document.getElementById("scienceMarks").value);
+        const englishMarks = parseFloat(document.getElementById("englishMarks").value);
+        const photo = document.getElementById("photo").files[0];
 
-        // Validate input
-        if (!name || !rollNo || isNaN(mathMarks) || isNaN(scienceMarks) || isNaN(englishMarks)) {
-            alert("Please fill in all fields correctly.");
+        if (!photo) {
+            alert("Please upload a photo.");
             return;
         }
 
-        // Create a photo URL from the uploaded file (if any)
-        let photoURL = null;
-        if (photoInput.files && photoInput.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                photoURL = e.target.result;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const total = mathMarks + scienceMarks + englishMarks;
+            const average = (total / 3).toFixed(2);
+            const grade = getGrade(average);
 
-                // Create a student object
-                const student = {
-                    name: name,
-                    rollNo: rollNo,
-                    mathMarks: mathMarks,
-                    scienceMarks: scienceMarks,
-                    englishMarks: englishMarks,
-                    totalMarks: mathMarks + scienceMarks + englishMarks,
-                    averageMarks: ((mathMarks + scienceMarks + englishMarks) / 3).toFixed(2),
-                    grade: getGrade((mathMarks + scienceMarks + englishMarks) / 3),
-                    photoURL: photoURL
-                };
-
-                // Store student data in localStorage
-                let students = JSON.parse(localStorage.getItem('students')) || [];
-                students.push(student);
-                localStorage.setItem('students', JSON.stringify(students));
-
-                // Redirect to the results page
-                window.location.href = 'results.html';
+            const student = {
+                name, rollNo, mathMarks, scienceMarks, englishMarks, total, average, grade, photo: e.target.result
             };
-            reader.readAsDataURL(photoInput.files[0]); // Read the image file as data URL
-        } else {
-            alert("Please upload a photo.");
-        }
+
+            let students = JSON.parse(localStorage.getItem("students")) || [];
+            students.push(student);
+            localStorage.setItem("students", JSON.stringify(students));
+
+            loadResults();
+            document.getElementById("studentForm").reset();
+        };
+        reader.readAsDataURL(photo);
     });
+
+    // ---------- LOAD RESULTS ----------
+    function loadResults() {
+        const resultsBody = document.getElementById("resultsBody");
+        resultsBody.innerHTML = "";
+        const students = JSON.parse(localStorage.getItem("students")) || [];
+
+        students.forEach(st => {
+            const row = `<tr>
+                <td><img src="${st.photo}" alt="photo"></td>
+                <td>${st.name}</td>
+                <td>${st.rollNo}</td>
+                <td>${st.mathMarks}</td>
+                <td>${st.scienceMarks}</td>
+                <td>${st.englishMarks}</td>
+                <td>${st.total}</td>
+                <td>${st.average}</td>
+                <td>${st.grade}</td>
+            </tr>`;
+            resultsBody.innerHTML += row;
+        });
+    }
 </script>
 
 </body>
